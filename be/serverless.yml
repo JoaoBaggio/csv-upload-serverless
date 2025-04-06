@@ -1,0 +1,112 @@
+service: csv-processor-service
+
+provider:
+  name: aws
+  runtime: nodejs18.x  # Ou a versão que você está usando
+  region: us-east-1
+  stage: dev
+  environment:
+    LOCALSTACK: "true"
+    AWS_REGION: us-east-1
+    BUCKET_NAME: csv-bucket-2  # Nome do seu bucket S3
+    CSV_QUEUE_NAME: CsvQueue
+    SQS_QUEUE_URL: !GetAtt CsvQueue.QueueUrl  # URL da fila SQS
+    DYNAMODB_TABLE: Users-2  # Nome da tabela DynamoDB
+
+plugins:
+  - serverless-localstack
+
+custom:
+  localstack:
+    stages:
+      - dev
+    endpoint: http://localhost:4566
+      
+functions:
+  generatePresignedUrl:
+    handler: src/lambda/generatePresignedUrl.handler
+    events:
+      - http:
+          path: process-csv
+          method: post
+          cors: true
+      - http:
+          path: process-csv
+          method: options
+          cors: true
+  csvProcessor:
+    handler: src/lambda/csvProcessor.handler
+    events:
+      - s3:
+          bucket: ${self:provider.environment.BUCKET_NAME}
+          event: s3:ObjectCreated:*
+          rules:
+            - suffix: .csv
+  sqsConsumer:
+    handler: src/lambda/sqsConsumer.handler
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - CsvQueue
+              - Arn
+          batchSize: 10
+  getUsers:
+    handler: src/lambda/getUsers.handler
+    events:
+      - http:
+          path: api/get-users
+          method: get
+          cors: true
+      - http:
+          path: api/get-users
+          method: options
+          cors: true
+
+resources:
+  Resources:
+    # Bucket S3
+    CsvBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.environment.BUCKET_NAME}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedHeaders: ["*"]
+              AllowedMethods: ["GET", "PUT", "POST", "DELETE", "HEAD"]
+              AllowedOrigins: ["*"]
+              ExposeHeaders: ["ETag"]
+              MaxAge: 3000
+
+    # Fila SQS
+    CsvQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: csv-queue
+
+    # Tabela DynamoDB
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+          
+  Outputs:
+    CsvBucketName:
+      Description: "Bucket S3 name"
+      Value: !Ref CsvBucket
+    CsvQueueUrl:
+      Description: "URL da fila SQS"
+      Value: !Ref CsvQueue
+    UsersTableName:
+      Description: "Nome da tabela DynamoDB"
+      Value: !Ref UsersTable
+

@@ -1,0 +1,3 @@
+.serverless/
+be/.serverless/
+*/node_modules
