@@ -82,8 +82,6 @@ resources:
                 - "HEAD"
               AllowedOrigins:
                 - "*"
-              ExposeHeaders:
-                - "ETag"
               MaxAge: 3000
     CsvQueue:
       Type: AWS::SQS::Queue
