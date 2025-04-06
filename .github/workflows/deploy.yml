@@ -55,11 +55,8 @@ jobs:
       - name: Deploy to AWS
         run: |
           cd be
-          serverless
-          serverless deploy
+          echo ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY}
+          serverless deploy --stage prod
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
 

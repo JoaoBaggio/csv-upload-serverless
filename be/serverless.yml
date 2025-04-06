@@ -8,9 +8,6 @@ provider:
   environment:
     LOCALSTACK: ${self:provider.stage}  # Se estiver em 'dev', irá usar LocalStack
     AWS_REGION: us-east-1
-    AWS_ACCESS_KEY_ID: ${env:AWS_ACCESS_KEY_ID}
-    AWS_SECRET_ACCESS_KEY: ${env:AWS_SECRET_ACCESS_KEY}
-    AWS_SESSION_TOKEN: ${env:AWS_SESSION_TOKEN}
     BUCKET_NAME: csv-bucket-2
     CSV_QUEUE_NAME: CsvQueue
     SQS_QUEUE_URL: !GetAtt CsvQueue.QueueUrl
