@@ -8,7 +8,7 @@ provider:
   environment:
     LOCALSTACK: ${self:provider.stage}  # Se estiver em 'dev', irá usar LocalStack
     AWS_REGION: us-east-1
-    BUCKET_NAME: csv-bucket-2
+    BUCKET_NAME: csv-bucket-2-joaobaggio
     CSV_QUEUE_NAME: CsvQueue
     SQS_QUEUE_URL: !GetAtt CsvQueue.QueueUrl
     DYNAMODB_TABLE: Users-2
