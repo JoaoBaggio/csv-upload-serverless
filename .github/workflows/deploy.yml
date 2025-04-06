@@ -30,13 +30,16 @@ jobs:
         run: |
           npm install -g serverless
 
-      # 5. Configurar AWS CLI (usando credenciais da AWS)
-      - name: Configure AWS CLI
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1  # Altere para sua região
+      # 5. Assumir a role no AWS e configurar as credenciais temporárias
+      - name: Assume AWS Role
+        id: assume_role
+        run: |
+          ROLE_ARN="arn:aws:iam::477763713497:role/serverless-role"
+          CREDENTIALS=$(aws sts assume-role --role-arn $ROLE_ARN --role-session-name serverless-session)
+          echo $CREDENTIALS
+          echo "AWS_ACCESS_KEY_ID=$(echo $CREDENTIALS | jq -r .Credentials.AccessKeyId)" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=$(echo $CREDENTIALS | jq -r .Credentials.SecretAccessKey)" >> $GITHUB_ENV
+          echo "AWS_SESSION_TOKEN=$(echo $CREDENTIALS | jq -r .Credentials.SessionToken)" >> $GITHUB_ENV
 
       # 6. Realizar o deploy com Serverless Framework
       - name: Deploy to AWS
@@ -45,6 +48,7 @@ jobs:
           serverless deploy
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-          AWS_REGION: us-east-1
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
+
