@@ -40,6 +40,7 @@ functions:
       - s3:
           bucket: ${self:provider.environment.BUCKET_NAME}
           event: s3:ObjectCreated:*
+          existing: true
           rules:
             - suffix: .csv
   sqsConsumer:
