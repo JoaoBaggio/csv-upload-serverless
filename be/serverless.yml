@@ -7,7 +7,6 @@ provider:
   stage: ${opt:stage, 'dev'}  # Usando variável de estágio para diferenciar dev e prod
   environment:
     LOCALSTACK: ${self:provider.stage}  # Se estiver em 'dev', irá usar LocalStack
-    AWS_REGION: us-east-1
     BUCKET_NAME: csv-bucket-2-jao-${opt:stage, 'dev'}  # Nome único para cada estágio
     CSV_QUEUE_NAME: CsvQueue
     SQS_QUEUE_URL: !GetAtt CsvQueue.QueueUrl
