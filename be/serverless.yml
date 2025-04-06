@@ -2,7 +2,7 @@ service: csv-processor-service
 
 provider:
   name: aws
-  runtime: nodejs18.x  # Ou a versão que você está usando
+  runtime: nodejs20.x  # Ou a versão que você está usando
   region: us-east-1
   stage: dev
   environment:
