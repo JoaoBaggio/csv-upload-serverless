@@ -30,13 +30,23 @@ jobs:
         run: |
           npm install -g serverless
 
-      # 5. Assumir a role no AWS e configurar as credenciais temporárias
+      # 5. Configurar o AWS CLI com as credenciais do IAM User
+      - name: Configure AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1  # Altere para sua região
+
+      # 6. Assumir a Role usando STS com as credenciais do IAM User
       - name: Assume AWS Role
         id: assume_role
         run: |
           ROLE_ARN="arn:aws:iam::477763713497:role/serverless-role"
           CREDENTIALS=$(aws sts assume-role --role-arn $ROLE_ARN --role-session-name serverless-session)
-          echo $CREDENTIALS
+          echo "Assumed Role Credentials: $CREDENTIALS"
+          
+          # Definindo as variáveis de ambiente para as credenciais temporárias
           echo "AWS_ACCESS_KEY_ID=$(echo $CREDENTIALS | jq -r .Credentials.AccessKeyId)" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=$(echo $CREDENTIALS | jq -r .Credentials.SecretAccessKey)" >> $GITHUB_ENV
           echo "AWS_SESSION_TOKEN=$(echo $CREDENTIALS | jq -r .Credentials.SessionToken)" >> $GITHUB_ENV
