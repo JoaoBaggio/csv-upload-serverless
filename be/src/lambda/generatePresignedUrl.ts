@@ -5,7 +5,7 @@ const s3 = new S3Client({
   region: "us-east-1", // Substitua pela sua região AWS
 });
 
-const BUCKET_NAME = "csv-bucket-2-joaobaggio";
+const BUCKET_NAME = process.env.BUCKET_NAME;
 
 export const handler = async (event: any) => {
   try {
