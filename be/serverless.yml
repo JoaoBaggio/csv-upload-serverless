@@ -65,28 +65,26 @@ functions:
           cors: true
 
 resources:
-Resources:
-  CsvBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: ${self:provider.environment.BUCKET_NAME}
-      CorsConfiguration:
-        CorsRules:
-          - AllowedHeaders:
-              - "*"
-            AllowedMethods:
-              - "GET"
-              - "PUT"
-              - "POST"
-              - "DELETE"
-              - "HEAD"
-            AllowedOrigins:
-              - "*"
-            ExposeHeaders:
-              - "ETag"
-            MaxAge: 3000
-
-
+  Resources:
+    CsvBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.environment.BUCKET_NAME}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedHeaders:
+                - "*"
+              AllowedMethods:
+                - "GET"
+                - "PUT"
+                - "POST"
+                - "DELETE"
+                - "HEAD"
+              AllowedOrigins:
+                - "*"
+              ExposeHeaders:
+                - "ETag"
+              MaxAge: 3000
     CsvQueue:
       Type: AWS::SQS::Queue
       Properties:
