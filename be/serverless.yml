@@ -2,16 +2,16 @@ service: csv-processor-service
 
 provider:
   name: aws
-  runtime: nodejs20.x  # Ou a versão que você está usando
+  runtime: nodejs20.x
   region: us-east-1
-  stage: dev
+  stage: ${opt:stage, 'dev'}  # Usando variável de estágio para diferenciar dev e prod
   environment:
-    LOCALSTACK: "true"
+    LOCALSTACK: ${self:provider.stage}  # Se estiver em 'dev', irá usar LocalStack
     AWS_REGION: us-east-1
-    BUCKET_NAME: csv-bucket-2  # Nome do seu bucket S3
+    BUCKET_NAME: csv-bucket-2
     CSV_QUEUE_NAME: CsvQueue
-    SQS_QUEUE_URL: !GetAtt CsvQueue.QueueUrl  # URL da fila SQS
-    DYNAMODB_TABLE: Users-2  # Nome da tabela DynamoDB
+    SQS_QUEUE_URL: !GetAtt CsvQueue.QueueUrl
+    DYNAMODB_TABLE: Users-2
 
 plugins:
   - serverless-localstack
@@ -20,8 +20,9 @@ custom:
   localstack:
     stages:
       - dev
-    endpoint: http://localhost:4566
-      
+    endpoint: http://localhost:4566  # Localstack endpoint
+    region: us-east-1
+
 functions:
   generatePresignedUrl:
     handler: src/lambda/generatePresignedUrl.handler
@@ -65,7 +66,6 @@ functions:
 
 resources:
   Resources:
-    # Bucket S3
     CsvBucket:
       Type: AWS::S3::Bucket
       Properties:
@@ -78,13 +78,11 @@ resources:
               ExposeHeaders: ["ETag"]
               MaxAge: 3000
 
-    # Fila SQS
     CsvQueue:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: csv-queue
 
-    # Tabela DynamoDB
     UsersTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -98,7 +96,7 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
-          
+
   Outputs:
     CsvBucketName:
       Description: "Bucket S3 name"
@@ -109,4 +107,3 @@ resources:
     UsersTableName:
       Description: "Nome da tabela DynamoDB"
       Value: !Ref UsersTable
-
